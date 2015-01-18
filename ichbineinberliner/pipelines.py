@@ -6,16 +6,7 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import simplejson, urllib
-
-# url = "http://maps.googleapis.com/maps/api/directions/json?origin={0}&destination={1}&sensor=false&departure_time=1421312400&mode=transit"
-# #url = "http://maps.googleapis.com/maps/api/distancematrix/json?origins={0}&destinations={1}&mode=transit&departure_time=1421312400&language=en-EN&sensor=false"
-# orig = wohnungs[0]["addr"].encode("utf-8")
-# dest = (52.444311,13.273748)
-# url = url.format(orig,str(dest))
-# result= simplejson.load(urllib.urlopen(url))
-# driving_time = result['routes'][0]['legs'][0]['duration']['value']
-# driving_time
-
+import googlemaps
 
 
 class IchbineinberlinerPipeline(object):
@@ -24,15 +15,36 @@ class IchbineinberlinerPipeline(object):
 
 class AddDistanceToMPIPipeline(object):
 
-	latlong_mpi =  str((52.444311,13.273748))
-	url = "http://maps.googleapis.com/maps/api/directions/json?origin={0}&destination={1}&sensor=false&departure_time=1421312400&mode=transit"
+    latlong_mpi = str((52.444311, 13.273748))
 
-	def process_item(self, item, spider):
-		orig = item["addr"] #.encode("utf-8","ignore")
-		dest = self.latlong_mpi
-		url = self.url.format(orig, dest)
-		result= simplejson.load(urllib.urlopen(url))
-		time = result['routes'][0]['legs'][0]['duration']['value']/60.
-		item["time_to"] = time
-		return item
-	
+    def __init__(self, ):
+	self.gm_client = googlemaps.Client("")
+
+    def process_item(self, item, spider):
+	orig = item["addr"]
+	geoloc = self.gm_client.geocode(orig)
+
+	if len(geoloc) > 0:
+	    for k in ('lat', 'lng'):
+		item[k] = geoloc[0]['geometry']['location'][k]
+
+	directions_result = self.gm_client.directions(str((item['lat'], item['lng'])),
+						      self.latlong_mpi,
+						      mode="transit",
+						      departure_time=1421307820)
+
+	#  Pick the fastest way
+	chosen_leg = None
+	if len(directions_result) > 0:
+	    for dr in directions_result:
+		for l in dr["legs"]:
+		    if chosen_leg is None:
+			chosen_leg = l
+		    if chosen_leg is not None and \
+		       chosen_leg["duration"]["value"] > l["duration"]["value"]:
+			chosen_leg = l
+
+	if chosen_leg is None:
+	    return
+	item["time_to"] = chosen_leg["duration"]["value"]/60.0
+	return item

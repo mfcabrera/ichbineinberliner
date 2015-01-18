@@ -12,9 +12,12 @@ class YummyBerlinerItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
 	source_id = scrapy.Field()
-	link =  scrapy.Field()
-	addr =  scrapy.Field()
-	sqm  =  scrapy.Field()
+	link = scrapy.Field()
+	addr = scrapy.Field()
+	sqm  = scrapy.Field()
 	miete = scrapy.Field()
 	zimmer = scrapy.Field()
-	time_to = scrapy.Field() # time to destination using transit or driving
+	time_to = scrapy.Field()  # time to destination using transit or driving
+	url = scrapy.Field()
+	lat = scrapy.Field()
+	lng = scrapy.Field()
