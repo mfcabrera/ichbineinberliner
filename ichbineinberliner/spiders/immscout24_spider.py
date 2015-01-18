@@ -17,7 +17,7 @@ def clean_encode(string):
 
 class ImmoScout24Spider(scrapy.Spider):
 	name = "immoscout24"
-	areas = ["kreuzberg", "schoeneberg"]
+	areas = ["kreuzberg", "schoeneberg", "charlottenburg"]  # ""
 	allowed_domains = ["immobilienscout24.de"]
 	root_urls = ["http://www.immobilienscout24.de/wohnen/berlin,berlin,{}-{}/mietwohnungen".format(area, area) for area in areas]
 	start_urls = [root_url + ".html" for root_url in root_urls] + [root_url + ",seite-%s.html"  % page for page in xrange(2, 20) for root_url in root_urls]

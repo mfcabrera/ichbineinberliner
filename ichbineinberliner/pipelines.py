@@ -18,7 +18,7 @@ class AddDistanceToMPIPipeline(object):
     latlong_mpi = str((52.444311, 13.273748))
 
     def __init__(self, ):
-	self.gm_client = googlemaps.Client("")
+	self.gm_client = googlemaps.Client("AIzaSyD1tR9ag8ImBLr4BJdr-ZMTP0bFOXPJFUk")
 
     def process_item(self, item, spider):
 	orig = item["addr"]
